@@ -1,0 +1,30 @@
+# Clean distribution defaults. Never contains a key or personal paths.
+active = "groq"
+history_messages = 8
+history_chars = 4000
+warmup = false
+voice_mode = "light"
+allow_local_vision = false
+
+[profiles.groq]
+label = "Groq · GPT OSS 120B"
+engine = "groq"
+model = "openai/gpt-oss-120b"
+api_key_env = "GROQ_API_KEY"
+max_tokens = 768
+vision = false
+
+[profiles.groq-fast]
+label = "Groq rápido · GPT OSS 20B"
+engine = "groq"
+model = "openai/gpt-oss-20b"
+api_key_env = "GROQ_API_KEY"
+max_tokens = 768
+vision = false
+
+[profiles.local-quality]
+label = "Avanzado · Qwen 3.5 9B local (requiere Ollama y equipo potente)"
+engine = "ollama"
+model = "qwen3.5:9b"
+max_tokens = 1024
+vision = true

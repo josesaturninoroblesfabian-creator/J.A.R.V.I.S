@@ -1,0 +1,12 @@
+<resources>
+    <style name="JarvisTheme" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#5EE1F2</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowBackground">#0B101C</item>
+        <item name="android:statusBarColor">#0B101C</item>
+        <item name="android:navigationBarColor">#0B101C</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>

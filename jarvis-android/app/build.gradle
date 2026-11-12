@@ -1,0 +1,28 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'io.jarvispersonal.mobile'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'io.jarvispersonal.mobile'
+        minSdk 33
+        targetSdk 36
+        versionCode 2
+        versionName '0.1.1-beta'
+        testInstrumentationRunner 'io.jarvispersonal.mobile.SmokeInstrumentation'
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    signingConfigs {
+        beta {
+            if (System.getenv('JARVIS_ANDROID_KEYSTORE')) {
+                storeFile file(System.getenv('JARVIS_ANDROID_KEYSTORE'))
+                storePassword System.getenv('JARVIS_ANDROID_STORE_PASSWORD')
+                keyAlias 'jarvis-beta'
+                keyPassword System.getenv('JARVIS_ANDROID_STORE_PASSWORD')
+            }
+        }
+    }
+    buildTypes { release { minifyEnabled false; signingConfig signingConfigs.beta } }
+    testBuildType 'release'
+    lint { abortOnError true; checkReleaseBuilds true }
+}
+dependencies { testImplementation 'junit:junit:4.13.2' }

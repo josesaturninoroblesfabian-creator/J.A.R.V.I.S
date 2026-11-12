@@ -1,0 +1,4 @@
+# Additional local desktop controls. Uses the existing OpenJarvis environment.
+PyAutoGUI>=0.9.54,<1
+Pillow>=11,<14
+opencv-python-headless>=4.10,<5
