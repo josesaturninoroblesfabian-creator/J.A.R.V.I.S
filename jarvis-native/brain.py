@@ -272,13 +272,15 @@ class JarvisBrain:
             max_tokens=cfg.intelligence.max_tokens,
             max_turns=cfg.agent.max_turns,
             parallel_tools=False,
-            prompt_builder=None if self.profile.engine == "groq" else self._prompt_builder,
+            prompt_builder=(
+                None if self.profile.engine in {"groq", "gemini"} else self._prompt_builder
+            ),
             system_prompt=(
                 "Eres Jarvis. Habla en español con naturalidad y brevedad. "
                 "Usa herramientas para acciones o datos externos. No inventes resultados; "
                 "si una herramienta falla, explica qué falta sin repetir sus efectos."
             )
-            if self.profile.engine == "groq"
+            if self.profile.engine in {"groq", "gemini"}
             else None,
         )
         self._available_tool_names = [tool.spec.name for tool in tools]
@@ -397,6 +399,15 @@ class JarvisBrain:
                     self.last_error = str(exc)
                     log.warning("Proveedor temporalmente ocupado; espera %.1f s", exc.seconds)
                     return str(exc)
+                if self.profile.engine == "gemini":
+                    from openai import APIError
+
+                    from credential_store import credential_error
+
+                    if isinstance(exc, APIError):
+                        self.last_error = credential_error(exc, "Gemini")
+                        log.warning("Solicitud de Gemini fallida: %s", type(exc).__name__)
+                        return self.last_error
                 log.exception("Falló la petición al modelo")
                 self.last_error = str(exc)
                 # Never replay a failed tool run through another model: side
@@ -498,7 +509,7 @@ class JarvisBrain:
                         ],
                         model=self.model,
                         temperature=0.5,
-                        max_tokens=768 if self.profile.engine == "groq" else 256,
+                        max_tokens=768 if self.profile.engine in {"groq", "gemini"} else 256,
                     )
                     .get("content", "")
                     .strip()

@@ -14,7 +14,7 @@ La salida pública es una beta sin firma digital. Usar Python 3.11 x64 en Window
 5. Ejecutar `packaging/build.ps1` desde PowerShell.
 
 El script genera `dist/Jarvis/Jarvis.exe` con sus bibliotecas en `_internal` y
-`release/Jarvis-Setup-0.2.1-beta-x64.exe`. No se debe distribuir solo el exe portátil:
+`release/Jarvis-Setup-0.2.2-beta-x64.exe`. No se debe distribuir solo el exe portátil:
 necesita su carpeta `_internal`. El instalador ya contiene toda esa carpeta.
 
 El compilador usa una lista de archivos públicos; no copia `jarvis-native/data/`,

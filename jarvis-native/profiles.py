@@ -12,7 +12,7 @@ try:
 except ModuleNotFoundError:
     import tomli as tomllib
 
-from app_paths import profile_path
+from app_paths import asset_path, profile_path
 
 PROFILE_PATH = profile_path()
 
@@ -52,8 +52,12 @@ class NativeSettings:
 def load_settings(path: Path = PROFILE_PATH, profile_name: str | None = None):
     with path.open("rb") as handle:
         data = tomllib.load(handle)
+    profile_values = data.get("profiles", {})
+    if path == PROFILE_PATH and "gemini" not in profile_values:
+        with asset_path("profiles.default.toml").open("rb") as handle:
+            profile_values["gemini"] = tomllib.load(handle)["profiles"]["gemini"]
     profiles = {}
-    for name, values in data.get("profiles", {}).items():
+    for name, values in profile_values.items():
         profile = Profile(name=name, **values)
         if profile.max_tokens is not None and (
             type(profile.max_tokens) is not int or profile.max_tokens < 1

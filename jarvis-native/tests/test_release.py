@@ -11,7 +11,7 @@ from companion import companion_command
 from credential_store import credential_error
 from profiles import load_settings
 from provider_errors import ProviderBusy, retry_delay
-from providers import GroqEngine
+from providers import GEMINI_MODEL, GeminiEngine, GroqEngine
 
 
 @pytest.mark.parametrize("text", ["enciende la cámara", "prende mi cámara", "activa la webcam"])
@@ -68,6 +68,30 @@ def test_rate_limit_wait_is_taken_from_header_not_invented():
     error = SimpleNamespace(response=SimpleNamespace(headers={"retry-after": "6.25"}))
     assert retry_delay(error) == 6.25
     assert "org_" not in credential_error(ProviderBusy(6.25))
+
+
+def test_gemini_keeps_tool_signature_for_the_next_request():
+    from openjarvis.core.types import Message, Role, ToolCall
+
+    engine = GeminiEngine(api_key="test-key")
+    try:
+        call = MagicMock()
+        call.model_dump.return_value = {
+            "id": "gemini-call",
+            "function": {"name": "calculator", "arguments": "{}"},
+            "extra_content": {"google": {"thought_signature": "example-signature"}},
+        }
+        assert "extra_content" not in engine._tool_calls([call])[0]
+        message = Message(
+            role=Role.ASSISTANT, tool_calls=[ToolCall("gemini-call", "calculator", "{}")]
+        )
+        payload = engine._payload(
+            [message], GEMINI_MODEL, 0.7, 768
+        )
+        sent_call = payload["messages"][0]["tool_calls"][0]
+        assert sent_call["extra_content"]["google"]["thought_signature"] == "example-signature"
+    finally:
+        engine.close()
 
 
 def test_429_retries_only_the_same_http_request_once(monkeypatch):

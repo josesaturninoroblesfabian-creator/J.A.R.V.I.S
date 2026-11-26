@@ -3,6 +3,9 @@
 Asistente personal en español para Windows y Android. La versión Windows combina
 voz ligera, cámara, enfoque, memoria y herramientas de escritorio. La versión
 Android funciona por cuenta propia y conversa con Groq con una clave del usuario.
+En Windows puedes elegir Gemini 3.5 Flash-Lite, Groq u Ollama en **Cerebro**.
+Para configurar una API, elige el servicio en el selector de claves y pulsa
+**Guardar y comprobar clave**. Después elige su modelo y pulsa **Aplicar y reconectar**.
 
 En Windows, usa **Salir de Jarvis** o la **X** para cerrar la ventana y el holograma.
 Desmarca **Mostrar holograma** si quieres seguir usando Jarvis con la pantalla libre.

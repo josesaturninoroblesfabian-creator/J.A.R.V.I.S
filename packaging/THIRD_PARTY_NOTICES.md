@@ -1,4 +1,4 @@
-# Jarvis Personal 0.2.1 beta · avisos de distribución
+# Jarvis Personal 0.2.2 beta · avisos de distribución
 
 Esta distribución integra OpenJarvis, modificado para el escritorio de Windows.
 Se conserva su licencia Apache 2.0 en licenses/OpenJarvis/LICENSE.

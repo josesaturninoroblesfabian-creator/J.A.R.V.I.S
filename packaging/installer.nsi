@@ -2,8 +2,8 @@ Unicode True
 !include "MUI2.nsh"
 !include "x64.nsh"
 !include "WinVer.nsh"
-Name "Jarvis Personal 0.2.1 beta"
-OutFile "..\release\Jarvis-Setup-0.2.1-beta-x64.exe"
+Name "Jarvis Personal 0.2.2 beta"
+OutFile "..\release\Jarvis-Setup-0.2.2-beta-x64.exe"
 InstallDir "$LOCALAPPDATA\Programs\JarvisPersonal"
 RequestExecutionLevel user
 SetCompressor /SOLID zlib
@@ -32,7 +32,7 @@ Section "Jarvis"
   CreateDirectory "$SMPROGRAMS\Jarvis Personal"
   CreateShortcut "$SMPROGRAMS\Jarvis Personal\Jarvis.lnk" "$INSTDIR\Jarvis.exe"
   CreateShortcut "$DESKTOP\Jarvis Personal.lnk" "$INSTDIR\Jarvis.exe"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\JarvisPersonal" "DisplayName" "Jarvis Personal 0.2.1 beta"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\JarvisPersonal" "DisplayName" "Jarvis Personal 0.2.2 beta"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\JarvisPersonal" "UninstallString" '"$INSTDIR\Desinstalar.exe"'
 SectionEnd
 Section "Uninstall"

@@ -4,10 +4,10 @@ import re
 
 
 class ProviderBusy(RuntimeError):
-    def __init__(self, seconds):
+    def __init__(self, seconds, *, provider="Groq"):
         self.seconds = max(1, min(86400, seconds))
         super().__init__(
-            f"Groq alcanzó su cuota temporal. Espera unos {self.seconds:.0f} segundos "
+            f"{provider} alcanzó su cuota temporal. Espera unos {self.seconds:.0f} segundos "
             "y vuelve a intentarlo. Tu petición no se reiniciará automáticamente."
         )
 

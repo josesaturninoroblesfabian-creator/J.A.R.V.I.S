@@ -28,3 +28,11 @@ engine = "ollama"
 model = "qwen3.5:9b"
 max_tokens = 1024
 vision = true
+
+[profiles.gemini]
+label = "Gemini · 3.5 Flash-Lite"
+engine = "gemini"
+model = "gemini-3.5-flash-lite"
+api_key_env = "GEMINI_API_KEY"
+max_tokens = 768
+vision = false

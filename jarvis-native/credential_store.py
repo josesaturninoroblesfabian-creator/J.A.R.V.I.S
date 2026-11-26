@@ -80,7 +80,7 @@ def get_credential(name):
     return os.environ.get(name, "").strip() or CredentialStore().load(name)
 
 
-def credential_error(exc):
+def credential_error(exc, provider="Groq"):
     """Never put SDK exception bodies or credential values into user-facing messages."""
     from provider_errors import ProviderBusy
 
@@ -88,9 +88,11 @@ def credential_error(exc):
         return str(exc)
     status = getattr(exc, "status_code", None)
     if status in (401, 403):
-        return "Groq rechazó la clave o el acceso al modelo. Actualízala en Cerebro."
+        return f"{provider} rechazó la clave o el acceso al modelo. Revísala en Cerebro."
     if status == 429:
-        return "Groq alcanzó su cuota temporal. Espera o selecciona un modelo local."
+        return f"{provider} alcanzó su cuota temporal. Espera o selecciona otro modelo."
     if status == 400:
-        return "Groq rechazó el formato de la petición o sus límites de contexto."
-    return "No se pudo conectar con Groq. Revisa la conexión y vuelve a probar."
+        return f"{provider} rechazó la clave, el formato o los límites de la petición."
+    if status == 404:
+        return f"{provider} no ofrece ese modelo para esta cuenta. Selecciona otro en Cerebro."
+    return f"No se pudo conectar con {provider}. Revisa la conexión y vuelve a probar."

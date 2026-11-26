@@ -194,7 +194,7 @@ class JarvisWindow(QMainWindow):
     select_conversation = Signal(str)
     stop_requested = Signal()
     exit_requested = Signal()
-    credential_save = Signal(str)
+    credential_save = Signal(str, str)
     performance_changed = Signal()
 
     def __init__(self, settings):
@@ -511,22 +511,30 @@ class JarvisWindow(QMainWindow):
         box.addWidget(self.model_status)
         box.addWidget(
             label(
-                "Modo ligero: cerebro en Groq y voz local compacta. La cámara del compañero "
-                "funciona sin IA visual pesada ni envíos de imagen a Groq.",
+                "Modo ligero: voz local compacta. La cámara del compañero "
+                "procesa la presencia en tu equipo.",
                 name="muted",
             )
         )
-        self.groq_key = QLineEdit()
-        self.groq_key.setEchoMode(QLineEdit.Password)
-        self.groq_key.setPlaceholderText("Nueva clave de Groq · guardada cifrada para tu usuario")
-        self.groq_key.setAccessibleName("Clave API de Groq")
-        box.addWidget(self.groq_key)
-        save_key = QPushButton("Guardar y comprobar Groq")
+        credential_provider = QComboBox()
+        credential_provider.setAccessibleName("Servicio de la clave API")
+        credential_provider.addItem("Groq", "groq")
+        credential_provider.addItem("Gemini", "gemini")
+        if settings.profile.engine == "gemini":
+            credential_provider.setCurrentIndex(credential_provider.findData("gemini"))
+        box.addWidget(credential_provider)
+        self.api_key = QLineEdit()
+        self.api_key.setEchoMode(QLineEdit.Password)
+        self.api_key.setPlaceholderText("Clave API · se guarda cifrada para tu usuario")
+        self.api_key.setAccessibleName("Clave API")
+        box.addWidget(self.api_key)
+        credential_provider.currentIndexChanged.connect(self.api_key.clear)
+        save_key = QPushButton("Guardar y comprobar clave")
 
         def submit_key():
-            key = self.groq_key.text().strip()
-            self.groq_key.clear()
-            self.credential_save.emit(key)
+            key = self.api_key.text().strip()
+            self.api_key.clear()
+            self.credential_save.emit(credential_provider.currentData(), key)
 
         save_key.clicked.connect(submit_key)
         box.addWidget(save_key)
@@ -691,7 +699,7 @@ class DesktopController(QObject):
         from companion_runtime import CompanionRuntime
 
         self.companion = CompanionRuntime(self, DATA_DIR)
-        self.window.credential_save.connect(self.save_groq_credential)
+        self.window.credential_save.connect(self.save_credential)
         self.window.performance_changed.connect(self.apply_performance)
         self.window.voice_mode.currentIndexChanged.connect(self.apply_performance)
         self.shutdown_timer = QTimer(self)
@@ -717,33 +725,38 @@ class DesktopController(QObject):
         temporary.replace(PROFILE_PATH)
         self.connect_brain(self.window.model.currentData())
 
-    @Slot(str)
-    def save_groq_credential(self, key):
+    @Slot(str, str)
+    def save_credential(self, provider, key):
         if self.busy or self.closing:
             self.window.credential_status.setText("Espera a que termine la operación actual.")
             return
         from credential_store import CredentialStore, credential_error
-        from providers import GroqEngine
+        from providers import GEMINI_MODEL, GeminiEngine, GroqEngine
+
+        engine_type, model = {
+            "groq": (GroqEngine, "openai/gpt-oss-120b"),
+            "gemini": (GeminiEngine, GEMINI_MODEL),
+        }[provider]
+        name = engine_type.provider
 
         def check():
             engine = None
             try:
-                store = CredentialStore()
-                if key:
-                    store.save("GROQ_API_KEY", key)
-                engine = GroqEngine(api_key=key or None)
+                engine = engine_type(api_key=key or None)
                 from openjarvis.core.types import Message, Role
 
                 result = engine.generate(
                     [Message(role=Role.USER, content="Responde únicamente: listo")],
-                    model="openai/gpt-oss-120b",
+                    model=model,
                     max_tokens=256,
                 )
                 if not result["content"].strip():
-                    return "Clave guardada, pero la prueba no devolvió texto. Vuelve a comprobar."
-                return "Groq comprobado. Selecciona su perfil y pulsa Aplicar y reconectar."
+                    return "La prueba no devolvió texto. Vuelve a comprobar la clave."
+                if key:
+                    CredentialStore().save(engine_type.key_name, key)
+                return f"{name} comprobado. Selecciona su perfil y pulsa Aplicar y reconectar."
             except Exception as exc:
-                return credential_error(exc)
+                return credential_error(exc, name)
             finally:
                 if engine:
                     engine.close()
@@ -751,7 +764,7 @@ class DesktopController(QObject):
         self.busy = True
         self.stop_listening()
         self.window.set_busy(True)
-        self.window.credential_status.setText("Comprobando Groq…")
+        self.window.credential_status.setText(f"Comprobando {name}…")
         job = Job(check, self)
 
         def done(message):
@@ -919,7 +932,7 @@ class DesktopController(QObject):
         if "necesita" in error and "KEY" in error:
             self.window.show_page(2)
             self.window.model_status.setText(
-                "Bienvenido. Introduce tu propia clave de Groq y pulsa Guardar y comprobar. "
+                "Bienvenido. Elige el servicio, introduce tu clave y pulsa Guardar y comprobar. "
                 "Después pulsa Aplicar y reconectar. "
                 "Tus datos y tu clave pertenecen a esta cuenta de Windows."
             )
